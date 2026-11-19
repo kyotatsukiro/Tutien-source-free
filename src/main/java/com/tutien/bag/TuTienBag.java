@@ -111,7 +111,11 @@ public class TuTienBag implements Listener {
         inv.setItem(SLOT_BTN_CLOSE,  hubButton("bag.close", "§c✘ Đóng", List.of("§7Đóng túi đồ"), Material.BARRIER));
         inv.setItem(SLOT_BTN_SKILLS, hubButton("bag.skills", "§a⚔ Lấy Skill", List.of("§7Đặt lại 4 skill + Sách LK vào hotbar"), Material.NETHER_STAR));
         inv.setItem(SLOT_BTN_LT,     hubButton("bag.currency", "§6✦ Tiền", List.of("§7Xem số dư", "§7Shift+click: nạp tất cả"), Material.GOLD_NUGGET));
-        inv.setItem(SLOT_BTN_PB,     hubButton("bag.phabao", "§d◉ Pháp Bảo", List.of("§7Nhận pháp bảo miễn phí (lần đầu)"), Material.DIAMOND));
+       if (data.getExtraInt("claimed_starter_pb", 0) == 0) {
+            inv.setItem(SLOT_BTN_PB, hubButton("bag.phabao", "§d◉ Pháp Bảo", List.of("§7Nhận pháp bảo miễn phí (lần đầu)"), Material.DIAMOND));
+        } else {
+            inv.setItem(SLOT_BTN_PB, label("§8◉ Pháp Bảo (Đã nhận)"));
+        }
         inv.setItem(SLOT_BTN_LUYEN,  hubButton("bag.alchemy", "§e⚗ Luyện Đan", List.of("§7Xem công thức luyện đan"), Material.BLAZE_ROD));
         inv.setItem(SLOT_BTN_GUIDE,  hubButton("bag.guide", "§b? Hướng Dẫn", List.of("§7/guide — Hướng dẫn toàn bộ"), Material.BOOK));
 
@@ -292,9 +296,15 @@ public class TuTienBag implements Listener {
             return;
         }
         if (raw == SLOT_BTN_PB) {
-            p.closeInventory();
-            Bukkit.dispatchCommand(p, "tutien phabao");
-            return;
+          p.closeInventory();
+          if (data.getExtraInt("claimed_starter_pb", 0) == 1) {
+              p.sendMessage(plugin.prefix() + "§cBạn đã nhận Pháp Bảo miễn phí (lần đầu) rồi!");
+              return;
+          }
+          data.setExtraInt("claimed_starter_pb", 1);
+          plugin.getDataManager().save(data);
+          Bukkit.dispatchCommand(p, "tutien phabao");
+          return;
         }
         if (raw == SLOT_BTN_LUYEN) {
             p.closeInventory();
